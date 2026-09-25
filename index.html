@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Application</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Quiz Application</h1>
+    </header>
+    <main>
+        <h2>Welcome to the Quiz Application</h2>
+        <p>Answer the questions to test your knowledge!</p>
+    </main>
+    <section id="start-quiz-section" name="start-quiz-section">
+        <div id="quiz-questions" name="quiz-questions">
+            <p>Total Questions</p><br>
+            <p>10</p>
+        </div>
+        <div id="quiz-time" name="quiz-time">
+            <p>Time Limit</p><br>
+            <p>60 seconds</p>
+        </div>
+    <button id="start-quiz" name="start-quiz">Start Quiz</button>
+    </section>
+    <section id="quiz-section" name="quiz-section">
+        <div id="quiz-container" name="quiz-container">
+            <div id="quiz-header" name="quiz-header">
+                <p>Question <span id="question-number" name="question-number">1 of 10</span></p>
+                <p>Time: <span id="time-left" name="time-left">60</span> seconds</p>
+            </div>
+            <div id="question-container" name="question-container">
+                <p id="question-text" name="question-text"></p>
+            </div>  
+                <ul id="answer-options" name="answer-options">
+                </ul>
+            <div id="quiz-footer" name="quiz-footer">
+                <button id="previous-question" name="previous-question">Previous Question</button>
+                <button id="submit-answer" name="submit-answer">Submit Answer</button>
+                <button id="next-question" name="next-question">Next Question</button>
+            </div>
+        </div>
+    </section>
+    <section id="result-section" name="result-section">
+        <img src="quiz-completed.png" alt="Quiz Completed" id="quiz-completed-image" name="quiz-completed-image">
+        <h1>Quiz Completed!</h1>
+        <div id="result-container" name="result-container">
+            <h2>Quiz Results</h2>
+            <p id="score" name="score"></p>
+            <button id="restart-quiz" name="restart-quiz">Restart Quiz</button>
+        </div>
+
+    </section>
+    <script src="script.js"></script>
+</body>
+</html>
+    
