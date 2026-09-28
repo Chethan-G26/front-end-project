@@ -1,3 +1,19 @@
-body {
-    font-family: Arial, sans-serif;
+#start-quiz-section {
+   background-color: #eae4e4;
+  padding: 50px 0;
+  font-size: 20px;
+  font-color: #333333fd;
+  margin: 0;
+  text-align: center;
+}
+main {
+  background-color: #eae4e4;
+  padding: 50px 0;
+  font-size: 20px;
+  font-color: #333333fd;
+  margin: 0;
+  text-align: center;
+}
+div {
+  content-align: ;
 }
