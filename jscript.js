@@ -54,75 +54,87 @@ const questions = [
 let currentQuestionIndex = 0;
 let score = 0;
 let timeLeft = 60;
-let timer = null;
+let timer;
 let selectedAnswers = [];
+
+const storageKey = "quizProgress";
 
 const startQuizButton = document.getElementById("start-quiz");
 const startQuizSection = document.getElementById("start-quiz-section");
 const quizSection = document.getElementById("quiz-section");
 const resultSection = document.getElementById("result-section");
 
-const questionNumberElement = document.getElementById("question-number");
-const questionTextElement = document.getElementById("question-text");
-const optionsContainer = document.getElementById("answer-options");
-const timerElement = document.getElementById("time-left");
+const questionNumber = document.getElementById("question-number");
+const questionText = document.getElementById("question-text");
+const answerOptions = document.getElementById("answer-options");
+const timeLeftElement = document.getElementById("time-left");
 
-const nextButton = document.getElementById("next-question");
 const previousButton = document.getElementById("previous-question");
-const restartButton = document.getElementById("restart-quiz");
 const submitButton = document.getElementById("submit-answer");
+const nextButton = document.getElementById("next-question");
+const restartButton = document.getElementById("restart-quiz");
 
 const scoreElement = document.getElementById("score");
 
 quizSection.style.display = "none";
 resultSection.style.display = "none";
 
-startQuizButton.addEventListener("click", startQuiz);
-
-function startQuiz() {
-    startQuizSection.style.display = "none";
-    quizSection.style.display = "block";
-    resultSection.style.display = "none";
-
+startQuizButton.addEventListener("click", function () {
     currentQuestionIndex = 0;
     score = 0;
     timeLeft = 60;
     selectedAnswers = [];
 
-    timerElement.textContent = timeLeft;
+    localStorage.removeItem(storageKey);
+
+    startQuizSection.style.display = "none";
+    quizSection.style.display = "block";
+    resultSection.style.display = "none";
 
     displayQuestion();
     startTimer();
-}
+    saveProgress();
+});
 
 function displayQuestion() {
     const currentQuestion = questions[currentQuestionIndex];
 
-    questionNumberElement.textContent =
+    questionNumber.textContent =
         `${currentQuestionIndex + 1} of ${questions.length}`;
 
-    questionTextElement.textContent =
-        currentQuestion.question;
+    questionText.textContent = currentQuestion.question;
 
-    optionsContainer.innerHTML = "";
+    answerOptions.innerHTML = "";
 
-    currentQuestion.options.forEach(function(option) {
-        const optionItem = document.createElement("li");
-        const optionButton = document.createElement("button");
+    currentQuestion.options.forEach(function (option) {
+        const li = document.createElement("li");
+        const button = document.createElement("button");
 
-        optionButton.textContent = option;
-        optionButton.classList.add("option-button");
+        button.type = "button";
+        button.textContent = option;
+        button.classList.add("option-button");
 
         if (selectedAnswers[currentQuestionIndex] === option) {
-            optionButton.classList.add("selected");
+            button.classList.add("selected");
         }
 
-        optionButton.addEventListener("click", function() {
-            selectOption(option);
+        button.addEventListener("click", function () {
+            selectedAnswers[currentQuestionIndex] = option;
+
+            const allButtons =
+                document.querySelectorAll(".option-button");
+
+            allButtons.forEach(function (item) {
+                item.classList.remove("selected");
+            });
+
+            button.classList.add("selected");
+
+            saveProgress();
         });
 
-        optionItem.appendChild(optionButton);
-        optionsContainer.appendChild(optionItem);
+        li.appendChild(button);
+        answerOptions.appendChild(li);
     });
 
     previousButton.disabled = currentQuestionIndex === 0;
@@ -130,45 +142,32 @@ function displayQuestion() {
         currentQuestionIndex === questions.length - 1;
 }
 
-function selectOption(selectedOption) {
-    selectedAnswers[currentQuestionIndex] = selectedOption;
-
-    const optionButtons =
-        document.querySelectorAll(".option-button");
-
-    optionButtons.forEach(function(button) {
-        button.classList.remove("selected");
-
-        if (button.textContent === selectedOption) {
-            button.classList.add("selected");
-        }
-    });
-}
-
-nextButton.addEventListener("click", function() {
+nextButton.addEventListener("click", function () {
     if (currentQuestionIndex < questions.length - 1) {
         currentQuestionIndex++;
         displayQuestion();
+        saveProgress();
     }
 });
 
-previousButton.addEventListener("click", function() {
+previousButton.addEventListener("click", function () {
     if (currentQuestionIndex > 0) {
         currentQuestionIndex--;
         displayQuestion();
+        saveProgress();
     }
 });
 
-submitButton.addEventListener("click", function() {
-    clearInterval(timer);
+submitButton.addEventListener("click", function () {
     calculateScore();
+    clearInterval(timer);
     showResult();
 });
 
 function calculateScore() {
     score = 0;
 
-    questions.forEach(function(question, index) {
+    questions.forEach(function (question, index) {
         if (selectedAnswers[index] === question.answer) {
             score++;
         }
@@ -178,10 +177,12 @@ function calculateScore() {
 function startTimer() {
     clearInterval(timer);
 
-    timer = setInterval(function() {
+    timer = setInterval(function () {
         timeLeft--;
 
-        timerElement.textContent = timeLeft;
+        timeLeftElement.textContent = timeLeft;
+
+        saveProgress();
 
         if (timeLeft <= 0) {
             clearInterval(timer);
@@ -194,6 +195,8 @@ function startTimer() {
 function showResult() {
     clearInterval(timer);
 
+    localStorage.removeItem(storageKey);
+
     quizSection.style.display = "none";
     startQuizSection.style.display = "none";
     resultSection.style.display = "block";
@@ -202,7 +205,7 @@ function showResult() {
         `Your Score: ${score} out of ${questions.length}`;
 }
 
-restartButton.addEventListener("click", function() {
+restartButton.addEventListener("click", function () {
     clearInterval(timer);
 
     currentQuestionIndex = 0;
@@ -210,9 +213,98 @@ restartButton.addEventListener("click", function() {
     timeLeft = 60;
     selectedAnswers = [];
 
+    localStorage.removeItem(storageKey);
+
     resultSection.style.display = "none";
     quizSection.style.display = "none";
     startQuizSection.style.display = "block";
 
-    timerElement.textContent = timeLeft;
+    timeLeftElement.textContent = timeLeft;
+});
+
+function saveProgress() {
+    if (quizSection.style.display !== "block") {
+        return;
+    }
+
+    const progress = {
+        currentQuestionIndex: currentQuestionIndex,
+        score: score,
+        timeLeft: timeLeft,
+        selectedAnswers: selectedAnswers
+    };
+
+    localStorage.setItem(
+        storageKey,
+        JSON.stringify(progress)
+    );
+}
+
+function loadProgress() {
+    const savedData = localStorage.getItem(storageKey);
+
+    if (!savedData) {
+        return false;
+    }
+
+    try {
+        const progress = JSON.parse(savedData);
+
+        if (
+            typeof progress.currentQuestionIndex !== "number" ||
+            progress.currentQuestionIndex < 0 ||
+            progress.currentQuestionIndex >= questions.length
+        ) {
+            localStorage.removeItem(storageKey);
+            return false;
+        }
+
+        if (
+            typeof progress.timeLeft !== "number" ||
+            progress.timeLeft <= 0
+        ) {
+            localStorage.removeItem(storageKey);
+            return false;
+        }
+
+        currentQuestionIndex =
+            progress.currentQuestionIndex;
+
+        score =
+            typeof progress.score === "number"
+                ? progress.score
+                : 0;
+
+        timeLeft = progress.timeLeft;
+
+        selectedAnswers =
+            Array.isArray(progress.selectedAnswers)
+                ? progress.selectedAnswers
+                : [];
+
+        return true;
+
+    } catch (error) {
+        localStorage.removeItem(storageKey);
+        return false;
+    }
+}
+
+window.addEventListener("load", function () {
+    const savedQuiz = loadProgress();
+
+    if (savedQuiz) {
+        startQuizSection.style.display = "none";
+        quizSection.style.display = "block";
+        resultSection.style.display = "none";
+
+        timeLeftElement.textContent = timeLeft;
+
+        displayQuestion();
+        startTimer();
+    } else {
+        startQuizSection.style.display = "block";
+        quizSection.style.display = "none";
+        resultSection.style.display = "none";
+    }
 });
